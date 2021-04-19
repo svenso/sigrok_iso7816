@@ -1,2 +1,38 @@
-# sigrok_iso7816
-Sigrok ISO7816 (Smartcard) decoder
+# Sigrok ISO7816 (Smartcard) decoder
+
+This sigrok decoder helps parsing Smartcard data recorded by a digital signal processor.
+
+For example it can be used to sniff SIM-Card data:
+
+![SIM-Sniff](https://github.com/svenso/sigrok_iso7816/blob/master/resources/sim_sniff.jpg?raw=true)
+
+The examples directory holds a SIM-sniff sample and the corresponding pcap.
+
+## T=0
+![T=0 sample](https://github.com/svenso/sigrok_iso7816/blob/master/resources/paymentcard_to.PNG?raw=true)
+
+## T=1
+![T=1 sample](https://github.com/svenso/sigrok_iso7816/blob/master/resources/mastercard_t1.PNG?raw=true)
+
+![T=1 wireshark](https://github.com/svenso/sigrok_iso7816/blob/master/resources/mastercard_t1_wireshark.PNG?raw=true)
+
+## FAQs
+- How to export to PCAP?
+    > "sigrok-cli.exe" --loglevel 1 -P iso7816:clk=0:data=2:clock_option=detect --input-file "PC_7_123456_46824768_wrong_pin.vcd" --input-format vcd -B iso7816=pcap > PC_7_123456_46824768_wrong_pin.pcap
+- What is clock_option?
+    - native
+        > use the native clock and specifications from ISO+IEC 7816-3-2006 (or sort of them :P). Good if you recorded the sample with enough high samplerate (usually about 10MHZ)
+    - detect
+        > try detecting the specifications (requires the first communication be an ATR). Most stable, even works if clock does not have the correct resolution.
+    - sample_as_clock
+        > uses sample as a clock (might be working in few circumstances). Experiment
+- Is error handling on phy implemented?
+    > no. if you got sample recordings with phys-errors, feel free to provide them.
+- Supported Protocols
+    > T=0 and T=1 (a bit)
+
+
+## Questions
+I got some issues with my Omnikey Reader, every 10th clock-cylcle was 3-times as long as it should be (after ATR). Any ideas?
+
+
