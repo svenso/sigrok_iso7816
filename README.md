@@ -4,17 +4,17 @@ This sigrok decoder helps parsing Smartcard data recorded by a digital signal pr
 
 For example it can be used to sniff SIM-Card data:
 
-![SIM-Sniff](https://github.com/svenso/sigrok_iso7816/blob/master/resources/sim_sniff.jpg?raw=true)
+![SIM-Sniff](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/sim_sniff.jpg)
 
 The examples directory holds a SIM-sniff sample and the corresponding pcap.
 
 ## T=0
-![T=0 sample](https://github.com/svenso/sigrok_iso7816/blob/master/resources/paymentcard_to.PNG?raw=true)
+![T=0 sample](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/paymentcard_to.PNG)
 
 ## T=1
-![T=1 sample](https://github.com/svenso/sigrok_iso7816/blob/master/resources/mastercard_t1.PNG?raw=true)
+![T=1 sample](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/mastercard_t1.PNG)
 
-![T=1 wireshark](https://github.com/svenso/sigrok_iso7816/blob/master/resources/mastercard_t1_wireshark.PNG?raw=true)
+![T=1 wireshark](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/mastercard_t1_wireshark.PNG)
 
 ## FAQs
 - How to export to PCAP?
