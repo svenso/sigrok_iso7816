@@ -9,9 +9,10 @@ For example it can be used to sniff SIM-Card data:
 The examples directory holds a SIM-sniff sample and the corresponding pcap.
 
 ## T=0
-![T=0 sample](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/paymentcard_t0.PNG)
+![T=0 sample](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/sim_t0.PNG)
 
-![T=0 wireshark](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/paymentcard_t0_wireshark.PNG)
+![T=0 wireshark](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/sim_t0_wireshark.PNG)
+
 ## T=1
 ![T=1 sample](https://raw.githubusercontent.com/svenso/sigrok_iso7816/main/resources/mastercard_t1.PNG)
 
