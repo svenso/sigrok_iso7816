@@ -19,6 +19,7 @@ import sigrokdecode as srd
 import struct
 import sys
 import codecs
+import ctypes
 
 class pcap_udp_pkt():
     # GSM TAP
@@ -164,6 +165,8 @@ class Decoder(srd.Decoder):
         self.ss = self.es = -1
         self.state = 'FIND START'
         self.bits = []
+        self.lastSamplePositive = True
+        self.sampleOverflowCount = 0
 
     def metadata(self, key, value):
         if key == srd.SRD_CONF_SAMPLERATE:
@@ -201,7 +204,9 @@ class Decoder(srd.Decoder):
             self.wrote_pcap_header = True
     
     def ts_from_samplenum(self, sample):
-        ts = float(sample) * self.secs_per_sample
+        x = ctypes.c_uint32(sample).value;
+        ovrflow = ctypes.c_uint32(int(self.sampleOverflowCount * 0xFFFFFFFF * self.secs_per_sample)).value
+        ts = float(x) * self.secs_per_sample + ovrflow
         return (int(ts), int((ts % 1.0) * 1e6))
 
     def read_first_byte(self):
@@ -250,6 +255,11 @@ class Decoder(srd.Decoder):
         return byte
 
     def read_byte(self):
+        if (self.samplenum < 0 and self.lastSamplePositive):
+            self.lastSamplePositive = False
+        if (self.lastSamplePositive == False and self.samplenum > 0 ):
+            self.sampleOverflowCount += 1
+            self.lastSamplePositive = True
         if (self.peeked_byte != None):
             byte =self.peeked_byte
             self.peeked_byte = None

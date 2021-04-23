@@ -31,7 +31,4 @@ The examples directory holds a SIM-sniff sample and the corresponding pcap.
     > T=0 and T=1 (a bit)
 
 
-## Questions
-I got some issues with my Omnikey Reader, every 10th clock-cylcle was 3-times as long as it should be (after ATR). Any ideas?
-
 
