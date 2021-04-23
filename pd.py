@@ -95,6 +95,10 @@ class Decoder(srd.Decoder):
     options = (
         {'id': 'clock_option', 'desc': 'Clock option',
             'default': 'native', 'values': ('native', 'detect', 'sample_as_clock')},
+        {'id': 'protocol', 'desc': 'Protocol',
+            'default': 'auto', 'values': ('auto', 'T=0', 'T=1')},
+        {'id': 'starts_with_atr', 'desc': 'Starts with ATR',
+            'default': 'true', 'values': ('true', 'false')},
     )
     annotations = (
         ('warnings', 'Human-readable warnings'),
@@ -165,6 +169,7 @@ class Decoder(srd.Decoder):
         self.ss = self.es = -1
         self.state = 'FIND START'
         self.bits = []
+        self.clock_skip = 372
         self.lastSamplePositive = True
         self.sampleOverflowCount = 0
 
@@ -180,6 +185,16 @@ class Decoder(srd.Decoder):
         self.out_binary = self.register(srd.OUTPUT_BINARY)
         self.sample_as_clock = self.options['clock_option'] == "sample_as_clock"
         self.detect_clock = self.options['clock_option'] == "detect"
+        if self.options['starts_with_atr'] == "true":
+            self.state = 'FIND START'
+        else:
+            self.state = 'DATA'
+        if (self.options['protocol'] == "T=0"):
+            self.hasT0 = True
+            self.hasT1 = False
+        elif (self.options['protocol'] == "T=1"):
+            self.hasT0 = False
+            self.hasT1 = True
 
     def pcap_global_header(self):
         # See https://wiki.wireshark.org/Development/LibpcapFileFormat.
@@ -220,20 +235,21 @@ class Decoder(srd.Decoder):
             self.detected_clock_skip = self.clock_skip
             self.wait({'skip': int(self.clock_skip / 3)})
             self.bits.append(0)
+        elif (self.detect_clock):
+            while (True):
+                pins = self.wait({0: 'r'})
+                self.clock_skip += 1
+                if (pins[1] == 1):            
+                    self.bits.append(0)
+                    for c in range(int(self.clock_skip / 2)): 
+                        self.wait({0: 'r'})
+                    break;
+            self.detected_clock_skip = self.clock_skip
         else:
-            if (self.detect_clock):
-                while (True):
-                    pins = self.wait({0: 'r'})
-                    self.clock_skip += 1
-                    if (pins[1] == 1):
-                        
-                        self.bits.append(0)
-                        for c in range(int(self.clock_skip / 2)): 
-                            self.wait({0: 'r'})
-                        break;
-                self.detected_clock_skip = self.clock_skip
-            else:
-                self.clock_skip = 372
+            self.clock_skip = 372
+            self.bits.append(0)
+            for c in range(int(self.clock_skip / 2 + self.clock_skip)): 
+                self.wait({0: 'r'})
 
         for x in range(9):
             pins = self.wait({'skip': 0})
@@ -321,7 +337,11 @@ class Decoder(srd.Decoder):
         historicalBytes = []
         self.ATR = []
 
-        byte = self.read_first_byte()
+        if (self.peeked_byte != None):
+            atr_start = self.peeked_samplenum
+            byte = self.read_byte()
+        else:
+            byte = self.read_first_byte()
         self.ATR.append(byte)
 
         t0 = self.read_byte()
@@ -384,6 +404,13 @@ class Decoder(srd.Decoder):
 
         self.log("ENDATR", codecs.encode(bytes(self.ATR), 'hex'))
         self.state = 'DATA'
+
+        if (self.options['protocol'] == "T=0"):
+            self.hasT0 = True
+            self.hasT1 = False
+        elif (self.options['protocol'] == "T=1"):
+            self.hasT0 = False
+            self.hasT1 = True
 
     def t1_parse_block(self, es):
         packet = []
@@ -530,6 +557,9 @@ class Decoder(srd.Decoder):
                 firstByte = self.peek_byte();
                 if (firstByte == 0xFF): # PPS Request
                     self.handle_pps();
+                    continue;
+                elif (firstByte == 0x3b): # Probably ATR
+                    self.handle_atr(self.wait({'skip': 0}))
                     continue;
 
                 es = self.peeked_samplenum;
