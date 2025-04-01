@@ -21,6 +21,15 @@ import sys
 import codecs
 import ctypes
 
+
+
+class Ann:
+    '''Annotation and binary output classes.'''
+    (
+        ANN_WARN, ANN_BYTE, ANN_ATR, ANN_PPS, ANN_T0, ANN_T1, ANN_T1IBLOCK, ANN_T1RBLOCK, ANN_T1SBLOCK, ANN_APDU,
+    ) = range(10)
+
+
 class pcap_udp_pkt():
     # GSM TAP
     h  = b''
@@ -101,7 +110,7 @@ class Decoder(srd.Decoder):
             'default': 'true', 'values': ('true', 'false')},
     )
     annotations = (
-        ('warnings', 'Human-readable warnings'),
+        ('warning', 'Human-readable warnings'),
         ('byte', 'Byte'),
         ('atr', 'ATR (Answer to Reset)'),
         ('pps', 'PPS (Protocol and parameters selection)'),
@@ -113,11 +122,11 @@ class Decoder(srd.Decoder):
         ('apdu', 'APDU'),
     )
     annotation_rows = (
-        ('warnings', 'Warnings', (0,)),
-        ('byte', 'Bytes', (1,)),
-        ('type', 'Type', (2,3,4,5,)),
-        ('t1', 'T=1 Decode', (6,7,8,)),
-        ('apdu', 'apdu', (9,)),
+        ('warnings', 'Warnings', (Ann.ANN_WARN,)),
+        ('bytes', 'Bytes', (Ann.ANN_BYTE,)),
+        ('type', 'Type', (Ann.ANN_ATR,Ann.ANN_PPS,Ann.ANN_T0,Ann.ANN_T1)),
+        ('t1blocks', 'T=1 Decode', (Ann.ANN_T1IBLOCK,Ann.ANN_T1RBLOCK,Ann.ANN_T1SBLOCK)),
+        ('apdus', 'apdu', (Ann.ANN_APDU,)),
     )
     binary = (
         ('pcap', 'PCAP format'),
